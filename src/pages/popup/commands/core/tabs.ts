@@ -7,7 +7,7 @@ import { Command } from "@src/shared/types/command";
 import { PaletteCommandId } from "@src/shared/paletteCommandIds";
 import { PaletteQueryId } from "@src/shared/paletteQueryIds";
 import { CommandBuilder } from "../../utils/command-builder";
-import { createLazyResource, matchCommand, setInput } from "../../util/signals";
+import { createLazyResource, matchCommand, setInput, setSearchMode } from "../../util/signals";
 import { requestQuery } from "../../util/query";
 import niceUrl from "../../util/nice-url";
 import { faviconURL } from "../../Entry";
@@ -36,10 +36,16 @@ const allTabsResource = createLazyResource<Command[]>([], async () => {
  * Static tab commands
  */
 const staticTabCommands: Command[] = [
-  // Search tabs command
+  // Search tabs command - shows all open tabs immediately
   CommandBuilder.createFrontendCommand({
     title: "Search Tabs",
-    command: () => setInput(TAB_KEYWORD + ">"),
+    subtitle: "Switch between open tabs",
+    command: () => {
+      // Clear input first to avoid triggering search mode exit
+      setInput("");
+      // Then activate tab search mode
+      setSearchMode("tabs");
+    },
     keyword: TAB_KEYWORD + ">",
     icon: faviconURL("about:blank"),
     category: "core",
@@ -103,4 +109,11 @@ export function quickTabCommands(): Command[] {
       shortcut: "?O~ t",
     }),
   ];
+}
+
+/**
+ * Get all tabs for search mode
+ */
+export function getAllTabs(): Command[] {
+  return allTabsResource();
 }
