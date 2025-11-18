@@ -4,6 +4,24 @@ export const inputSignal = createSignal("");
 
 export const [input, setInput] = inputSignal;
 
+/**
+ * Search mode types - extend this for new specialized search modes
+ */
+export type SearchMode = "tabs" | "bookmarks" | "history" | "extensions";
+
+/**
+ * Active search mode - controls which specialized view is active
+ *
+ * When set, replaces the default command list with specialized items:
+ * - "tabs": Shows all open browser tabs
+ * - "bookmarks": Shows all bookmarks
+ * - "history": Shows browsing history
+ * - "extensions": Shows installed extensions
+ *
+ * Mode is cleared when user starts typing to enable universal search
+ */
+export const [searchMode, setSearchMode] = createSignal<SearchMode | null>(null);
+
 export const parsedInput = createMemo(() => {
   const [match, keyword, query] = input().match(/^([a-zA-Z]+)>(.*)/) || [];
   return {

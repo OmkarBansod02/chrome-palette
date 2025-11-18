@@ -24,7 +24,15 @@ if (!appContainer) {
   throw new Error("Can not find AppContainer");
 }
 
-setCommandExecutedListener(() => {
+setCommandExecutedListener((command) => {
+  // Don't close palette for frontend commands that just change the input
+  // (like "Search Tabs", "Search Bookmarks", etc.)
+  // Only close for commands that actually do something (URLs, actions)
+  if (command.command) {
+    // This is a frontend command (setInput), keep palette open
+    return;
+  }
+  // For all other commands (URLs, background actions), close the palette
   postCloseMessage();
 });
 

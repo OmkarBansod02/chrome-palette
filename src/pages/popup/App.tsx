@@ -34,7 +34,11 @@ createEffect(() => {
 import { getAllCommands, Command } from "./commands";
 import { CommandAction } from "@src/shared/types/command";
 import { sortByUsed, storeLastUsed } from "./util/last-used";
-import { createStoredSignal, inputSignal, parsedInput } from "./util/signals";
+import { createStoredSignal, inputSignal, parsedInput, searchMode, setSearchMode } from "./util/signals";
+import { getAllTabs } from "./commands/core/tabs";
+import { getAllBookmarks } from "./commands/navigation/bookmarks";
+import { getAllHistory } from "./commands/navigation/history";
+import { getAllExtensions } from "./commands/navigation/extensions";
 
 type CommandListener = (command: Command) => void;
 
@@ -102,11 +106,7 @@ const runBackgroundCommand = async (action: CommandAction) => {
       typeof action.payload === "function"
         ? (action.payload as () => unknown)()
         : action.payload;
-    console.log("[Palette] Sending background command:", {
-      type: MESSAGE_RUN_COMMAND,
-      id: action.id,
-      payload,
-    });
+
     chrome.runtime.sendMessage(
       {
         type: MESSAGE_RUN_COMMAND,
@@ -114,9 +114,7 @@ const runBackgroundCommand = async (action: CommandAction) => {
         payload,
       },
       (response) => {
-        console.log("[Palette] Background command response:", response);
         if (chrome.runtime.lastError) {
-          console.error("[Palette] Background command error:", chrome.runtime.lastError);
           reject(new Error(chrome.runtime.lastError.message));
           return;
         }
@@ -124,7 +122,6 @@ const runBackgroundCommand = async (action: CommandAction) => {
           resolve();
         } else {
           const error = response?.error ?? "Palette command failed to execute.";
-          console.error("[Palette] Command execution failed:", error);
           reject(new Error(error));
         }
       }
@@ -146,11 +143,53 @@ const matches = createMemo(() => {
   });
 });
 
+/**
+ * Filtered commands - determines which commands to display based on:
+ * 1. Active search mode (tabs, bookmarks, history, extensions)
+ * 2. Keyword commands (t>, b>, h>, e>)
+ * 3. User search query
+ * 4. Default featured commands
+ */
 const filteredCommands = createMemo(() => {
-  if (!hasQuery()) {
-    return featuredCommands();
+  const mode = searchMode();
+  const parsed = parsedInput();
+  const query = inputValue().trim();
+
+  // Priority 1: Keyword commands (e.g., "t>", "b>")
+  if (parsed.isCommand && !parsed.query.trim()) {
+    return searchableCommands();
   }
-  return matches().map((match) => match.obj);
+
+  // Priority 2: Active search mode
+  if (mode) {
+    // If user starts typing, exit mode and search all commands
+    if (query) {
+      setSearchMode(null);
+      // Fall through to search
+    } else {
+      // Show mode-specific items
+      switch (mode) {
+        case "tabs":
+          return getAllTabs();
+        case "bookmarks":
+          return getAllBookmarks();
+        case "history":
+          return getAllHistory();
+        case "extensions":
+          return getAllExtensions();
+        default:
+          return featuredCommands();
+      }
+    }
+  }
+
+  // Priority 3: Search query
+  if (hasQuery()) {
+    return matches().map((match) => match.obj);
+  }
+
+  // Priority 4: Default featured commands
+  return featuredCommands();
 });
 
 const [selectedI_internal, setSelectedI] = createSignal(0);
@@ -166,23 +205,23 @@ createEffect(() => {
 });
 
 export const runCommand = async (command: Command) => {
-  console.log("[Palette] Running command:", command.title, command);
   try {
     storeLastUsed(command);
+
     if (command.action) {
-      console.log("[Palette] Executing action:", command.action);
       await runBackgroundCommand(command.action);
+      // Clear search mode when executing non-frontend commands
+      setSearchMode(null);
     } else if ("url" in command && command.url) {
-      console.log("[Palette] Opening URL:", command.url);
       await chrome.tabs.create({ url: command.url });
+      // Clear search mode when opening URLs
+      setSearchMode(null);
     } else if (command.command) {
-      console.log("[Palette] Executing command function");
       await command.command();
-    } else {
-      console.warn("[Palette] No action, url, or command found for:", command);
+      // Don't clear search mode - frontend commands may set it
     }
+
     commandExecutedListener?.(command);
-    console.log("[Palette] Command executed successfully");
   } catch (error) {
     console.error("[Palette] Error executing command:", error);
     throw error;
