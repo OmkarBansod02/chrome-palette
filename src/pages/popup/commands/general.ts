@@ -1,8 +1,14 @@
 // adapted from https://github.com/ssundarraj/commander/blob/master/src/js/actions.js
+import { PaletteCommandId } from "@src/shared/paletteCommandIds";
 import { resetHistory } from "~/util/last-used";
 import { inputSignal, parsedInput } from "~/util/signals";
 
-import { isTruthy } from "../util/isTruthy";
+type CommandActionPayload = unknown | (() => unknown);
+
+export type CommandAction = {
+  id: PaletteCommandId;
+  payload?: CommandActionPayload;
+};
 
 export type Command = {
   title: string;
@@ -11,81 +17,101 @@ export type Command = {
   lastVisitTime?: number;
   keyword?: string;
   icon?: string;
+  action?: CommandAction;
   command?: () => unknown;
   url?: string;
 };
 
 const [, setInputValue] = inputSignal;
 
-const getActiveTab = async () => {
-  const windowId = chrome.windows.WINDOW_ID_CURRENT;
-  const [currentTab] = await chrome.tabs.query({
-    active: true,
-    windowId,
-  });
-  return currentTab;
+const backgroundAction = (
+  id: PaletteCommandId,
+  payload?: CommandAction["payload"]
+): CommandAction => ({
+  id,
+  payload,
+});
+
+const openUrlAction = (url: string) =>
+  backgroundAction(PaletteCommandId.OPEN_URL, { url });
+
+const openUrlCommand = (
+  command: Omit<Command, "action" | "command"> & { url: string }
+): Command => ({
+  ...command,
+  action: openUrlAction(command.url),
+});
+
+type ScreenBoundsPayload = {
+  availLeft: number;
+  availTop: number;
+  availHeight: number;
+  availWidth: number;
+};
+
+const getScreenBounds = (): ScreenBoundsPayload => {
+  const scr = window.screen as Screen & {
+    availLeft?: number;
+    availTop?: number;
+  };
+  return {
+    availLeft: scr.availLeft ?? 0,
+    availTop: scr.availTop ?? 0,
+    availHeight: scr.availHeight,
+    availWidth: scr.availWidth,
+  };
 };
 const base: Command[] = [
   {
     title: "New Tab",
-    shortcut: "⌘ t",
-    command: async function () {
-      await chrome.tabs.create({});
-    },
+    subtitle: "Open a new tab",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2360a5fa'%3E%3Cpath d='M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z'/%3E%3Cpath d='M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z'/%3E%3C/svg%3E",
+    shortcut: "?O~ t",
+    action: backgroundAction(PaletteCommandId.TABS_NEW),
   },
   {
     title: "New Window",
-    shortcut: "⌘ n",
-    command: async function () {
-      await chrome.windows.create({});
+    subtitle: "Open a new browser window",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2360a5fa'%3E%3Cpath d='M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z'/%3E%3C/svg%3E",
+    shortcut: "?O~ n",
+    action: backgroundAction(PaletteCommandId.WINDOWS_NEW),
+  },
+  {
+    title: "Provider Settings",
+    subtitle: "Manage search providers and settings",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2360a5fa'%3E%3Cpath fill-rule='evenodd' d='M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z' clip-rule='evenodd'/%3E%3C/svg%3E",
+    command: async () => {
+      console.log("Provider settings clicked - TODO: implement settings UI");
     },
   },
-  {
+  openUrlCommand({
     title: "Open History Page",
-    shortcut: "⌘ y",
+    shortcut: "?O~ y",
     url: "chrome://history",
-  },
-  {
-    title: "Open Passwords Page",
-    url: "chrome://password-manager/passwords",
-  },
-  {
+  }),
+  openUrlCommand({
     title: "Open Downloads",
-    shortcut: "⌘⇧ d",
+    shortcut: "?O~?? d",
     url: "chrome://downloads",
-  },
-  {
+  }),
+  openUrlCommand({
     title: "Open Extensions",
     url: "chrome://extensions",
-  },
-  {
-    title: "Open Extension Shortcuts",
-    url: "chrome://extensions/shortcuts",
-  },
-  {
+  }),
+  openUrlCommand({
     title: "Open Bookmark Manager",
-    shortcut: "⌘⌥ b",
+    shortcut: "?O~?O? b",
     url: "chrome://bookmarks",
-  },
-  {
-    title: "Show/hide Bookmarks Bar",
-    shortcut: "⌘⇧ b",
-    command: async function () {
-      setInputValue("Unsupported. Use [⌘⇧ b] instead.");
-    },
-  },
-  {
+  }),
+  openUrlCommand({
     title: "Open Settings",
-    shortcut: "⌘ ,",
+    shortcut: "?O~ ,",
     url: "chrome://settings",
-  },
+  }),
   {
     title: "Close Current Tab",
-    shortcut: "⌘ w",
-    command: async function () {
-      const currentTab = await getActiveTab();
-      await chrome.tabs.remove(currentTab.id!);
-    },
+    shortcut: "?O~ w",
+    action: backgroundAction(PaletteCommandId.TABS_CLOSE_ACTIVE),
   },
   // {
   //   title: "Terminate Current Tab",
@@ -106,354 +132,63 @@ const base: Command[] = [
   // },
   {
     title: "Reload Tab",
-    shortcut: "⌘ r",
-    command: async function () {
-      await chrome.tabs.reload();
-      window.close();
-    },
+    shortcut: "?O~ r",
+    action: backgroundAction(PaletteCommandId.TABS_RELOAD_ACTIVE),
   },
   {
     title: "Reload All Tabs",
-    command: async function () {
-      const windowId = chrome.windows.WINDOW_ID_CURRENT;
-      const allTabIds = (await chrome.tabs.query({ windowId }))
-        .map(({ id }) => id)
-        .filter(isTruthy);
-      for (const id of allTabIds) {
-        await chrome.tabs.reload(id);
-      }
-      window.close();
-    },
+    action: backgroundAction(PaletteCommandId.TABS_RELOAD_ALL),
   },
   {
     title: "Clear Cache and Reload Tab",
-    shortcut: "⌘⇧ r",
-    command: async function () {
-      const tab = await getActiveTab();
-      await chrome.tabs.reload(tab.id!, { bypassCache: true });
-      window.close();
-    },
+    shortcut: "?O~?? r",
+    action: backgroundAction(PaletteCommandId.TABS_RELOAD_BYPASS_CACHE),
   },
   {
     title: "Toggle Pin",
-    command: async function () {
-      const currentTab = await getActiveTab();
-      await chrome.tabs.update({ pinned: !currentTab.pinned });
-      window.close();
-    },
+    action: backgroundAction(PaletteCommandId.TABS_TOGGLE_PIN),
   },
   {
     title: "Duplicate Tab",
-    command: async function () {
-      const currentTab = await getActiveTab();
-      await chrome.tabs.duplicate(currentTab.id!);
-    },
+    action: backgroundAction(PaletteCommandId.TABS_DUPLICATE_ACTIVE),
   },
   {
     title: "New Incognito Window",
-    shortcut: "⌘⇧ n",
-    command: async function () {
-      await chrome.windows.create({ incognito: true });
-    },
+    shortcut: "?O~?? n",
+    action: backgroundAction(PaletteCommandId.WINDOWS_NEW_INCOGNITO),
   },
   {
     title: "Close Other Tabs",
-    command: async function () {
-      const windowId = chrome.windows.WINDOW_ID_CURRENT;
-      const otherTabs = await chrome.tabs.query({
-        active: false,
-        windowId,
-      });
-      const otherTabIds = otherTabs.map(({ id }) => id!);
-      await chrome.tabs.remove(otherTabIds);
-      window.close();
-    },
+    action: backgroundAction(PaletteCommandId.TABS_CLOSE_OTHERS),
   },
   {
     title: "Close Tabs To Right",
-    command: async function () {
-      const windowId = chrome.windows.WINDOW_ID_CURRENT;
-      const currentTab = await getActiveTab();
-      const otherTabs = await chrome.tabs.query({
-        active: false,
-        windowId,
-      });
-      const otherTabIds = otherTabs
-        .filter((tab) => tab.index > currentTab.index)
-        .map(({ id }) => id!);
-      await chrome.tabs.remove(otherTabIds);
-      window.close();
-    },
+    action: backgroundAction(PaletteCommandId.TABS_CLOSE_RIGHT),
   },
   {
     title: "Close Tabs To Left",
-    command: async function () {
-      const currentTab = await getActiveTab();
-      const windowId = chrome.windows.WINDOW_ID_CURRENT;
-      const otherTabs = await chrome.tabs.query({
-        active: false,
-        windowId,
-      });
-      const otherTabIds = otherTabs
-        .filter((tab) => tab.index < currentTab.index)
-        .map(({ id }) => id!);
-      await chrome.tabs.remove(otherTabIds);
-      window.close();
-    },
+    action: backgroundAction(PaletteCommandId.TABS_CLOSE_LEFT),
   },
   {
     title: "Mute/Unmute Tab",
-    command: async function () {
-      const currentTab = await getActiveTab();
-      const isMuted = currentTab.mutedInfo!.muted;
-      await chrome.tabs.update({ muted: !isMuted });
-      window.close();
-    },
-  },
-  {
-    title: "Move Tab To Start",
-    command: async function () {
-      const currentTab = await getActiveTab();
-      await chrome.tabs.move(currentTab.id!, { index: 0 });
-      window.close();
-    },
-  },
-  {
-    title: "Move Tab To End",
-    command: async function () {
-      const currentTab = await getActiveTab();
-      await chrome.tabs.move(currentTab.id!, { index: -1 });
-      window.close();
-    },
+    action: backgroundAction(PaletteCommandId.TABS_TOGGLE_MUTE),
   },
   {
     title: "Move Tab Left",
-    command: async function () {
-      const currentTab = await getActiveTab();
-      await chrome.tabs.move(currentTab.id!, {
-        index: currentTab.index - 1,
-      });
-      window.close();
-    },
+    action: backgroundAction(PaletteCommandId.TABS_MOVE_LEFT),
   },
   {
     title: "Move Tab Right",
-    command: async function () {
-      const currentTab = await getActiveTab();
-      await chrome.tabs.move(currentTab.id!, {
-        index: currentTab.index + 1,
-      });
-      window.close();
-    },
+    action: backgroundAction(PaletteCommandId.TABS_MOVE_RIGHT),
   },
   {
     title: "Reopen/Unclose Tab",
-    shortcut: "⌘⇧ t",
-    command: async function () {
-      return await chrome.sessions.restore();
-    },
-  },
-  {
-    title: "Deattach Tab (Move to New Window)",
-    command: async function () {
-      const [tab] = await chrome.tabs.query({
-        currentWindow: true,
-        active: true,
-      });
-      await chrome.windows.create({ tabId: tab.id });
-    },
-  },
-  {
-    title: "Split screen (vertical)",
-    command: async function () {
-      const [tab] = await chrome.tabs.query({
-        currentWindow: true,
-        active: true,
-      });
-
-      const { availLeft, availTop, availHeight, availWidth } =
-        screen as Screen & { availLeft: number; availTop: number };
-      const currentWindow = await chrome.windows.getCurrent();
-      const halfHeight = Math.floor(availHeight / 2);
-      await chrome.windows.update(currentWindow.id!, {
-        left: availLeft,
-        top: availTop,
-        width: availWidth,
-        height: halfHeight,
-      });
-      // Create a new window with the current tab
-      await chrome.windows.create({
-        tabId: tab.id,
-        left: availLeft,
-        top: availTop + halfHeight,
-        width: availWidth,
-        height: halfHeight,
-        focused: true,
-      });
-    },
-  },
-  {
-    title: "Split screen (horizontal)",
-    command: async function () {
-      const [tab] = await chrome.tabs.query({
-        currentWindow: true,
-        active: true,
-      });
-      //@ts-ignore availLeft is missing from screen
-      const { availLeft, availTop, availHeight, availWidth } =
-        screen as Screen & { availLeft: number; availTop: number };
-      const currentWindow = await chrome.windows.getCurrent();
-      const halfWidth = Math.floor(availWidth / 2);
-      await chrome.windows.update(currentWindow.id!, {
-        left: availLeft,
-        top: availTop,
-        width: halfWidth,
-        height: availHeight,
-      });
-      // Create a new window with the current tab
-      await chrome.windows.create({
-        tabId: tab.id,
-        left: availLeft + halfWidth,
-        top: availTop,
-        width: halfWidth,
-        height: availHeight,
-        focused: true,
-      });
-    },
-  },
-  {
-    title: "Reattach Tab (Move Tab to Previous Window)",
-    command: async function () {
-      const [currentTab] = await chrome.tabs.query({
-        currentWindow: true,
-        active: true,
-      });
-      const currentWindow = await chrome.windows.getCurrent({
-        // windowTypes: ["normal"],
-      });
-      const allWindows = await chrome.windows.getAll({
-        windowTypes: ["normal"],
-      });
-      const otherWindows = allWindows.filter(
-        (win) => win.id !== currentWindow.id
-      );
-      const prevWindow = otherWindows[0];
-      await chrome.windows.update(prevWindow.id!, { focused: true });
-      await chrome.tabs.move(currentTab.id!, {
-        windowId: prevWindow.id,
-        index: -1,
-      });
-      await chrome.tabs.update(currentTab.id!, { highlighted: true });
-    },
-  },
-  {
-    title: "Toggle full screen",
-    shortcut: "⌃⌘ f",
-    command: async function () {
-      const currWindow = await chrome.windows.getCurrent();
-      const state = currWindow.state === "fullscreen" ? "normal" : "fullscreen";
-      chrome.windows.update(currWindow.id!, {
-        state,
-      });
-      window.close();
-    },
-  },
-  {
-    title: "Clear browsing history, cookies and cache",
-    shortcut: "⌘⇧ ⌫",
-    url: "chrome://settings/clearBrowserData",
-  },
-  {
-    title: "Open Chrome SignIn internals",
-    url: "chrome://signin-internals/",
-  },
-  {
-    title: "Open Chrome Apps",
-    url: "chrome://apps/",
-  },
-  {
-    title: "Configure Chrome internal flags",
-    url: "chrome://flags/",
-  },
-  {
-    title: "Configure Third-party Cookies",
-    url: "chrome://settings/cookies",
-  },
-  {
-    title: "Configure Ad privacy",
-    url: "chrome://settings/adPrivacy",
-  },
-  {
-    title: "Configure Sync and Google Services",
-    url: "chrome://settings/syncSetup",
-  },
-  {
-    title: "Configure Chrome Profile",
-    url: "chrome://settings/manageProfile",
-  },
-  {
-    title: "Import Bookmarks & Settings",
-    url: "chrome://settings/importData",
-  },
-  {
-    title: "Configure Addresses",
-    url: "chrome://settings/addresses",
-  },
-  {
-    title: "Configure Autofill & Passwords",
-    url: "chrome://settings/autofill",
-  },
-  {
-    title: "Configure Payment Methods",
-    url: "chrome://settings/payments",
-  },
-  {
-    title: "Configure Site Settings & Permissions",
-    url: "chrome://settings/content",
-  },
-  {
-    title: "Configure Security",
-    url: "chrome://settings/security",
-  },
-  {
-    title: "Configure Privacy and security",
-    url: "chrome://settings/privacy",
-  },
-  {
-    title: "Configure Search engine",
-    url: "chrome://settings/defaultBrowser",
-  },
-  {
-    title: "Configure Default browser",
-    url: "chrome://settings/defaultBrowser",
-  },
-  {
-    title: "Configure on Start-up",
-    url: "chrome://settings/onStartup",
-  },
-  {
-    title: "Configure Languages",
-    url: "chrome://settings/languages",
-  },
-  {
-    title: "Configure Accessibility",
-    url: "chrome://settings/accessibility",
-  },
-  {
-    title: "Configure System & Proxy",
-    url: "chrome://settings/system",
-  },
-  {
-    title: "Reset chrome settings",
-    url: "chrome://settings/resetProfileSettings?origin=userclick",
-  },
-  {
-    title: "About chrome",
-    url: "chrome://settings/help",
+    shortcut: "?O~?? t",
+    action: backgroundAction(PaletteCommandId.SESSIONS_RESTORE_LAST),
   },
   // {
   //   title: "Print page",
-  //   shortcut: "⌘ p",
+  //   shortcut: "?O~ p",
   //   command: async function () {
   //     const currentTab = await getActiveTab();
   //     chrome.tabs.update(currentTab.id!, { url: "chrome://print" });
@@ -469,6 +204,28 @@ const base: Command[] = [
         window.location.reload();
       }, 0);
     },
+  },
+];
+
+
+export const quickActionCommands = (): Command[] => [
+  {
+    title: "New Tab",
+    subtitle: "Open a new tab",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2360a5fa'%3E%3Cpath d='M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z'/%3E%3Cpath d='M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z'/%3E%3C/svg%3E",
+    action: backgroundAction(PaletteCommandId.TABS_NEW),
+  },
+  {
+    title: "New Window",
+    subtitle: "Open a new browser window",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2360a5fa'%3E%3Cpath d='M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z'/%3E%3C/svg%3E",
+    action: backgroundAction(PaletteCommandId.WINDOWS_NEW),
+  },
+  {
+    title: "Provider Settings",
+    subtitle: "Manage search providers and settings",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2360a5fa'%3E%3Cpath fill-rule='evenodd' d='M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z' clip-rule='evenodd'/%3E%3C/svg%3E",
+    url: "chrome-extension://djhdjhlnljbjgejbndockeedocneiaei/browseros-settings.html",
   },
 ];
 
