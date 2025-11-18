@@ -4,114 +4,236 @@
   <img width="400" alt="image" src="https://github.com/user-attachments/assets/23f2bd61-d58b-45a4-a2e4-b9e4c2613e7d" style="display: inline-block;"/>
 </p>
 
-<h1> Command Palette for Chrome<br/>Fast, no server, no ads, no telemetry.</h1>
+<h1>BrowserOS Command Palette<br/>Fast, Universal, AI-Powered</h1>
 
 ![](https://img.shields.io/badge/Typescript-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![](https://badges.aleen42.com/src/vitejs.svg)
 
-<!-- ![GitHub action badge](https://github.com/fuyutarow/solid-chrome-extension-template/actions/workflows/build.yml/badge.svg) -->
-
-<!-- > This project is listed in the [Awesome Vite](https://github.com/vitejs/awesome-vite) -->
+> Keyboard-first command palette for Chrome with BrowserOS integration. Works everywhere, including chrome:// pages.
 
 </div>
 
-## Installation
+## ✨ Features
 
-[Chrome Web Store](https://chrome.google.com/webstore/detail/chrome-palette/hjkpneggcnclhpkddehdhlkeljclcnbo)
+- 🚀 **Universal Access** - Works on every page, including chrome:// URLs via BrowserOS overlay
+- ⚡ **Lightning Fast** - 41.72 kB bundle, optimized for performance
+- 🎯 **Smart Search** - Fuzzy search with commands sorted by usage
+- 🤖 **AI Integration** - Direct access to ChatGPT, Claude, Perplexity, Deepseek, Gemini
+- 🎨 **Crystal Dark Theme** - Beautiful, accessible dark mode UI
+- ⌨️ **Keyboard First** - Navigate everything with keyboard shortcuts
+- 📦 **Zero Dependencies** - No server, no ads, no telemetry
 
-Or you can unzip [chrome-palette.zip](https://github.com/dbuezas/chrome-palette/raw/master/chrome-palette.zip) and load it unpacked from [chrome://extensions](chrome://extensions)
+## 🚀 Installation
 
-> The focus is performance, minimal size and ease of use.
+### For BrowserOS Users
 
-## Features <a name="features"></a>
+The command palette is integrated with BrowserOS. Use **Ctrl+Shift+P** (Windows/Linux) or **Cmd+Shift+P** (Mac) to open it from any page.
 
-- Commands sorted by usage
-- Fuzzy search of commands
-- Search sub commands (open tabs, bookmarks, history, etc)
-- Dark mode
-- See standard shortcuts
+### Manual Installation
 
-## Command list
+1. Clone this repository
+```bash
+git clone <your-repo-url>
+cd chrome-palette
+```
 
-- New Tab
-- New Window
-- Open History Page
-- Open Passwords Page
-- Open Downloads
-- Open Extensions
-- Open Extension Shortcuts
-- Open Bookmark Manager
-- Show/hide Bookmarks Bar
-- Open Settings
-- Close Current Tab
-- Terminate Current Tab
-- Reload Tab
-- Reload All Tabs
-- Clear Cache and Reload Tab
-- Toggle Pin
-- Duplicate Tab
-- New Incognito Window
-- Close Other Tabs
-- Close Tabs To Right
-- Close Tabs To Left
-- Mute/Unmute Tab
-- Move Tab To Start
-- Move Tab To End
-- Move Tab Left
-- Move Tab Right
-- Reopen/Unclose Tab
-- Deattach Tab (Move to New Window)
-- Reattach Tab (Move Tab to Previous Window)
-- Toggle full screen
-- Clear browsing history, cookies and cache
-- Open Chrome SignIn internals
-- Open Chrome Apps
-- Configure Chrome internal flags
-- Configure Third-party Cookies
-- Configure Ad privacy
-- Configure Sync and Google Services
-- Configure Chrome Profile
-- Import Bookmarks & Settings
-- Configure Addresses
-- Configure Autofill & Passwords
-- Configure Payment Methods
-- Configure Site Settings & Permissions
-- Configure Security
-- Configure Privacy and security
-- Configure Search engine
-- Configure Default browser
-- Configure on Start-up
-- Configure Languages
-- Configure Accessibility
-- Configure System & Proxy
-- Reset chrome settings
-- About chrome
-- Print page
-- Reset command history
-
-## Development
-
-- Made using SolidJS
-
+2. Install dependencies
 ```bash
 npm install
+```
+
+3. Build the extension
+```bash
+npm run build
+```
+
+4. Load in Chrome
+   - Open `chrome://extensions`
+   - Enable "Developer mode"
+   - Click "Load unpacked"
+   - Select the `dist` folder
+
+## 📖 Usage
+
+### Opening the Palette
+
+- **Keyboard Shortcut**: `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
+- **Toolbar Icon**: Click the BrowserOS Palette icon in your Chrome toolbar
+- **Works Everywhere**: Including chrome:// pages, settings, and extensions
+
+### Navigating Commands
+
+- **Type to search** - Fuzzy search filters commands instantly
+- **Arrow keys** - Navigate up/down through results
+- **Enter** - Execute selected command
+- **Escape** - Close the palette
+
+### Search Sub-commands
+
+Type special prefixes to search within categories:
+
+- `t>` - Search and switch between open tabs
+- Type any text - Search bookmarks, history, and extensions
+
+## 📋 Available Commands
+
+### Quick Actions
+- **New Tab** - Open a new browser tab
+- **New Window** - Open a new browser window
+
+### Tab Management
+- **Search Tabs** - Search and switch between all open tabs
+- **Close Tab** - Close the current tab
+- **Duplicate Tab** - Create a copy of the current tab
+- **Reopen Closed Tab** - Restore the last closed tab
+
+### Window Management
+- **New Incognito Window** - Open a private browsing window
+- **Close Other Tabs** - Close all tabs except the current one
+
+### Browser Settings
+- **Chrome Settings** - Open Chrome browser settings
+- **Extensions** - Manage Chrome extensions
+- **Downloads** - View downloaded files
+- **Browser History** - View browsing history
+- **BrowserOS Settings** - Configure LLM providers and BrowserOS settings
+
+### Navigation
+- **Bookmarks** - Search and open bookmarks
+- **Save Bookmark** - Save current page to bookmarks (with folder selection)
+- **Browse History** - Search browsing history
+- **Manage Extensions** - View and manage installed extensions
+
+### AI & Search Providers
+- **ChatGPT** - Open ChatGPT with optional query
+- **Claude** - Launch Claude AI chat
+- **Google** - Search Google
+- **Perplexity** - Research with Perplexity AI
+- **Deepseek** - Open Deepseek chat
+- **Gemini** - Launch Google Gemini
+- **DuckDuckGo AI** - Open DuckDuckGo AI chat
+
+### BrowserOS Agents
+- Execute custom BrowserOS agents directly from the palette
+- Agents are dynamically loaded from your BrowserOS configuration
+
+## 🏗️ Architecture
+
+### BrowserOS Overlay System
+
+The command palette uses BrowserOS's universal injection system:
+
+- **Overlay Page**: `src/pages/overlay/index.html` - Injected as a centered iframe
+- **Loader Script**: `public/browseros-loader.js` - Handles mounting/unmounting and event forwarding
+- **Background Worker**: Listens for keyboard shortcuts and toolbar clicks
+- **Universal Access**: Works on all pages via `chrome.browserOS.executeJavaScript`
+
+### Command System
+
+Commands are organized by category for extensibility:
+
+```
+src/pages/popup/commands/
+├── index.ts              # Centralized command registry
+├── core/                 # Core browser operations (tabs, windows, settings)
+├── navigation/           # Navigation (bookmarks, history, extensions)
+└── providers/            # LLM providers and BrowserOS agents
+```
+
+### Type System
+
+Shared TypeScript types ensure consistency:
+
+```
+src/shared/
+├── types/
+│   ├── command.ts       # Command interface and categories
+│   └── provider.ts      # Provider definitions
+├── providers.ts         # Provider registry
+├── paletteCommandIds.ts # Command ID enum
+└── paletteQueryIds.ts   # Query ID enum
+```
+
+## 🛠️ Development
+
+### Prerequisites
+- Node.js 16+
+- npm or yarn
+
+### Development Mode
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server (hot reload enabled)
 npm start
 ```
 
-> PRs welcome!
+The `dist` folder will be auto-rebuilt on file changes. Load it as an unpacked extension in Chrome.
 
-## Full Manual testing
+### Build for Production
 
-Import the `dist` folder as an unpacked extension in chrome. This folder is rebuilt on changes when using `npm start`
+```bash
+npm run build
+```
 
-## History
+### Project Structure
 
-| Version       | View Framework | Bundler | Manifest | Command Palette lib          | Total size | Compressed | Startup time |
-| ------------- | -------------- | ------- | -------- | ---------------------------- | ---------- | ---------- | ------------ |
-| v2.0.0 (2024) | SolidJS        | Vite    | V3       | Self Made                    | 79kb       | 38Kb       | 99ms         |
-| v1.2.1 (2022) | Preact         | ESBuild | V2       | Forked react-command-palette | 180kb      | 60Kb       | 220ms        |
-| v1.0.0 (2021) | React          | Webpack | V2       | react-command-palette        | 287kb      | 93Kb       | 350ms        |
+```
+chrome-palette/
+├── src/
+│   ├── pages/
+│   │   ├── background/      # Background service worker
+│   │   ├── overlay/         # BrowserOS overlay UI
+│   │   └── popup/           # Command palette UI
+│   └── shared/              # Shared types and utilities
+├── public/
+│   ├── assets/              # Icons and static files
+│   └── browseros-loader.js  # Injection script
+└── dist/                    # Build output
+```
 
-# Previous art
+## 📊 Performance
 
-- Commander: https://github.com/ssundarraj/commander
+| Metric | Value |
+|--------|-------|
+| Bundle Size | 41.72 kB |
+| Compressed | 16.10 kB |
+| Framework | SolidJS |
+| Bundler | Vite |
+| Manifest | V3 |
+
+## 🔧 Tech Stack
+
+- **Framework**: SolidJS (reactive, performant)
+- **Language**: TypeScript (strict mode)
+- **Bundler**: Vite (fast builds, hot reload)
+- **Styling**: SCSS (modular, scoped styles)
+- **Search**: Fuzzysort (fuzzy search library)
+- **Chrome API**: Manifest V3
+
+## 📝 Version History
+
+| Version | Framework | Bundler | Manifest | Size | Compressed | Notes |
+|---------|-----------|---------|----------|------|------------|-------|
+| **v3.0.0 (2025)** | SolidJS | Vite | V3 | 41.72kb | 16.10kb | BrowserOS integration, modular architecture |
+| v2.0.0 (2024) | SolidJS | Vite | V3 | 79kb | 38kb | SolidJS rewrite |
+| v1.2.1 (2022) | Preact | ESBuild | V2 | 180kb | 60kb | Preact migration |
+| v1.0.0 (2021) | React | Webpack | V2 | 287kb | 93kb | Initial release |
+
+## 🤝 Contributing
+
+This is a fork maintained for BrowserOS integration. For the original project, see [chrome-palette](https://github.com/dbuezas/chrome-palette).
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) file for details
+
+Original work Copyright (c) 2023 David Buezas
+
+## 🙏 Credits
+
+- Original Chrome Palette by [David Buezas](https://github.com/dbuezas)
+- BrowserOS integration and architecture refactor by the BrowserOS team
+
