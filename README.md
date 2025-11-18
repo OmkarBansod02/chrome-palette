@@ -23,7 +23,7 @@
 
 ### For BrowserOS Users
 
-The command palette is integrated with BrowserOS. Use **Ctrl+Shift+P** (Windows/Linux) or **Cmd+Shift+P** (Mac) to open it from any page.
+The command palette is integrated with BrowserOS. Use **Ctrl+B** (Windows/Linux) or **Cmd+B** (Mac) to open it from any page.
 
 ### Manual Installation
 
@@ -53,7 +53,7 @@ npm run build
 
 ### Opening the Palette
 
-- **Keyboard Shortcut**: `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
+- **Keyboard Shortcut**: `Ctrl+B` (Windows/Linux) or `Cmd+B` (Mac)
 - **Toolbar Icon**: Click the BrowserOS Palette icon in your Chrome toolbar
 - **Works Everywhere**: Including chrome:// pages, settings, and extensions
 
