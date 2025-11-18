@@ -1,29 +1,46 @@
 .Shortcut {
   align-self: center;
-  font-size: 12px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 
   &.clickable {
     cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
     &::after {
-      vertical-align: sub;
-      margin-left: 10px;
+      vertical-align: middle;
+      margin-left: 4px;
       content: "⚙";
-      font-size: 25px;
-      line-height: 0;
+      font-size: 16px;
+      line-height: 1;
+      opacity: 0.5;
     }
   }
+
   > kbd {
-    display: inline-block;
-    margin-left: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0;
     border: 1px solid var(--shortcut-border-color);
     border-radius: 4px;
     background-color: var(--shortcut-background-color);
-    padding: 2px;
-    width: 12px;
+    padding: 3px 6px;
+    min-width: 20px;
     color: var(--shortcut-text-color);
     font-family: system-ui;
+    font-size: 11px;
+    font-weight: 500;
     text-align: center;
     text-decoration: inherit;
     text-transform: uppercase;
+    line-height: 1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 }

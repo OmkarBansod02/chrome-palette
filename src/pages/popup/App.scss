@@ -1,26 +1,59 @@
 .App {
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   .input_wrap {
     display: flex;
-    border-bottom: 0.5px solid var(--input-border-color);
-    padding: 0 20px;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 14px 20px;
+    background: var(--app-background-color);
+    position: relative;
+
+    .search-icon {
+      width: 17px;
+      height: 17px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
     input {
       flex-grow: 1;
       appearance: none;
       box-sizing: border-box;
       outline: 0;
       border: none;
-      background-color: var(--app-background-color);
-      padding: 20px 0;
+      background-color: transparent;
+      padding: 0;
       color: var(--text-color);
-      font-size: 20px;
+      font-size: 15px;
       font-family: inherit;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+
+      &::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.5;
+        font-weight: 400;
+      }
+
+      &:focus::placeholder {
+        opacity: 0.3;
+      }
     }
+
   }
+
   .list {
     margin: 0;
-    padding: 0;
-    height: 300px;
+    padding: 8px 14px;
+    flex: 1;
     overflow: auto;
+    background: var(--app-background-color);
+    list-style: none;
   }
 }

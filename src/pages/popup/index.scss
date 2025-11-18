@@ -1,53 +1,76 @@
 body[theme="Light"] {
-  --app-background-color: #fefefe;
-  --entry-hover-background-color: #ebebeb88;
-  --entry-matched-text: #0072dd;
-  --entry-selected-background-color: #ebebeb;
-  --entry-selected-border-color: #d6d6d6;
-  --entry-selected-text-color: #222;
-  --input-border-color: #adadad;
-  --shortcut-background-color: #cde6ff;
-  --shortcut-border-color: #9bb7e2;
-  --shortcut-text-color: #455670;
-  --text-color: #222;
-  --thumbBG: #a7a7a7;
+  --app-background-color: #ffffff;
+  --app-background-secondary: #f8fafc;
+  --entry-hover-background-color: rgba(0, 0, 0, 0.04);
+  --entry-matched-text: #2563eb;
+  --entry-selected-background-color: rgba(37, 99, 235, 0.08);
+  --entry-selected-border-color: rgba(37, 99, 235, 0.3);
+  --entry-selected-text-color: #1e293b;
+  --input-border-color: rgba(0, 0, 0, 0.1);
+  --shortcut-background-color: rgba(37, 99, 235, 0.1);
+  --shortcut-border-color: rgba(37, 99, 235, 0.2);
+  --shortcut-text-color: #475569;
+  --text-color: #1e293b;
+  --text-secondary: #64748b;
+  --thumbBG: #cbd5e1;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --accent-primary: #2563eb;
+  --accent-secondary: #6366f1;
 }
 
 body[theme="Dark"] {
-  --app-background-color: #323232;
-  --entry-hover-background-color: #7d7d7d44;
-  --entry-matched-text: #54a9f8;
-  --entry-selected-background-color: #5d5c5c;
-  --entry-selected-border-color: #6f6f6f;
+  --app-background-color: #000000;
+  --app-background-secondary: #000000;
+  --entry-hover-background-color: rgba(255, 255, 255, 0.06);
+  --entry-matched-text: #ffffff;
+  --entry-selected-background-color: rgba(255, 255, 255, 0.10);
+  --entry-selected-border-color: transparent;
   --entry-selected-text-color: #ffffff;
-  --input-border-color: #adadad;
-  --shortcut-background-color: #4b72ae;
-  --shortcut-border-color: #6892d3;
-  --shortcut-text-color: #eee;
-  --text-color: #ccc;
-  --thumbBG: #a7a7a7;
-}
-.list::-webkit-scrollbar {
-  width: 8px;
+  --input-border-color: rgba(255, 255, 255, 0.12);
+  --shortcut-background-color: rgba(255, 255, 255, 0.12);
+  --shortcut-border-color: rgba(255, 255, 255, 0.18);
+  --shortcut-text-color: #aaaaaa;
+  --text-color: #ffffff;
+  --text-secondary: #aaaaaa;
+  --thumbBG: #333333;
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --accent-primary: #ffffff;
+  --accent-secondary: #cccccc;
 }
 .list {
-  scrollbar-color: var(--thumbBG);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
 }
-.list::-webkit-scrollbar-thumb {
-  border-radius: 5px;
-  background-color: var(--thumbBG);
+.list::-webkit-scrollbar {
+  display: none;
 }
 
 body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
   position: relative;
   margin: 0;
   background-color: var(--app-background-color);
-  width: 605px;
-  height: 364px;
+  width: 100%;
+  height: 100%;
   color: var(--text-color);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
+}
+
+html, body, #app-container {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }

@@ -21,18 +21,18 @@ export function faviconURL(u?: string) {
 export default function Entry(props: {
   isSelected: boolean;
   command: Command;
-  keyResults: Fuzzysort.KeysResult<Command>;
+  keyResults?: Fuzzysort.KeysResult<Command>;
 }) {
   const title = createMemo(() => {
     const txt = props.command.title || "";
-    if (!parsedInput().query) return txt;
+    if (!parsedInput().query || !props.keyResults) return txt;
     const r = props.keyResults[0].highlight((t) => <b>{t}</b>);
     if (r.length === 0) return txt;
     return r;
   });
   const subtitle = createMemo(() => {
     const txt = props.command.subtitle || "";
-    if (!parsedInput().query) return txt;
+    if (!parsedInput().query || !props.keyResults) return txt;
     const r = props.keyResults[1].highlight((t) => <b>{t}</b>);
     if (r.length === 0) return txt;
     return r;
@@ -40,7 +40,7 @@ export default function Entry(props: {
   const url = createMemo(() => {
     if (!("url" in props.command)) return "";
     const txt = props.command.url;
-    if (!parsedInput().query) return txt;
+    if (!parsedInput().query || !props.keyResults) return txt;
     const r = props.keyResults[2].highlight((t) => <b>{t}</b>);
     if (r.length === 0) return txt;
     return r;
@@ -65,10 +65,7 @@ export default function Entry(props: {
       <Show when={props.command.icon || faviconURL(props.command.url)}>
         {(icon) => (
           <img
-            classList={{
-              img: true,
-              img_big: !!(subtitle() || url()),
-            }}
+            class="entry-icon"
             src={icon()}
             alt=""
             loading="lazy"
@@ -82,22 +79,17 @@ export default function Entry(props: {
             {title()}
           </Show>
         </div>
-        <div class="subtitle">
-          <Show when={parsedInput().query} fallback={props.command.subtitle}>
-            {subtitle()}
-          </Show>
-        </div>
-        <div class="subtitle">
-          <Show when={parsedInput().query} fallback={props.command.url}>
-            {url()}
-          </Show>
-          <Show when={props.command.lastVisitTime}>
-            {(time) => <span class="time_ago">{twas(time())}</span>}
-          </Show>
-        </div>
+        <Show when={subtitle() || url()}>
+          <div class="subtitle">
+            <Show when={parsedInput().query} fallback={props.command.subtitle || props.command.url}>
+              {subtitle() || url()}
+            </Show>
+            <Show when={props.command.lastVisitTime}>
+              {(time) => <span class="time_ago">{twas(time())}</span>}
+            </Show>
+          </div>
+        </Show>
       </div>
-      <Shortcut keys={props.command.shortcut} />
-      <Keyword keyword={props.command.keyword} />
     </li>
   );
 }
