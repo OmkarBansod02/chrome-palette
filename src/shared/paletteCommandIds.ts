@@ -1,0 +1,33 @@
+export const PaletteCommandId = {
+  OPEN_URL: "core:open-url",
+  TABS_NEW: "tabs:new",
+  WINDOWS_NEW: "windows:new",
+  WINDOWS_NEW_INCOGNITO: "windows:new-incognito",
+  TABS_CLOSE_ACTIVE: "tabs:close-active",
+  TABS_RELOAD_ACTIVE: "tabs:reload-active",
+  TABS_RELOAD_ALL: "tabs:reload-all",
+  TABS_RELOAD_BYPASS_CACHE: "tabs:reload-bypass-cache",
+  TABS_TOGGLE_PIN: "tabs:toggle-pin",
+  TABS_DUPLICATE_ACTIVE: "tabs:duplicate-active",
+  TABS_CLOSE_OTHERS: "tabs:close-others",
+  TABS_CLOSE_RIGHT: "tabs:close-right",
+  TABS_CLOSE_LEFT: "tabs:close-left",
+  TABS_TOGGLE_MUTE: "tabs:toggle-mute",
+  TABS_MOVE_START: "tabs:move-start",
+  TABS_MOVE_END: "tabs:move-end",
+  TABS_MOVE_LEFT: "tabs:move-left",
+  TABS_MOVE_RIGHT: "tabs:move-right",
+  SESSIONS_RESTORE_LAST: "sessions:restore-last",
+  TABS_DETACH_TO_WINDOW: "tabs:detach-to-window",
+  WINDOWS_SPLIT_VERTICAL: "windows:split-vertical",
+  WINDOWS_SPLIT_HORIZONTAL: "windows:split-horizontal",
+  TABS_REATTACH_PREVIOUS_WINDOW: "tabs:reattach-previous-window",
+  WINDOWS_TOGGLE_FULLSCREEN: "windows:toggle-fullscreen",
+  TABS_FOCUS: "tabs:focus",
+  BOOKMARKS_SAVE_TO_FOLDER: "bookmarks:save-current-to-folder",
+  PROVIDERS_EXECUTE: "providers:execute",
+  AGENTS_EXECUTE: "agents:execute",
+} as const;
+
+export type PaletteCommandId =
+  (typeof PaletteCommandId)[keyof typeof PaletteCommandId];
