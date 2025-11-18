@@ -7,7 +7,7 @@ import { Command } from "@src/shared/types/command";
 import { PaletteCommandId } from "@src/shared/paletteCommandIds";
 import { PaletteQueryId } from "@src/shared/paletteQueryIds";
 import { CommandBuilder } from "../../utils/command-builder";
-import { createLazyResource, matchCommand, setInput } from "../../util/signals";
+import { createLazyResource, matchCommand, setInput, setSearchMode } from "../../util/signals";
 import { requestQuery } from "../../util/query";
 import { faviconURL } from "../../Entry";
 
@@ -59,7 +59,11 @@ const allBookmarksResource = createLazyResource<Command[]>([], async () => {
 const staticBookmarkCommands: Command[] = [
   CommandBuilder.createFrontendCommand({
     title: "Search Bookmarks",
-    command: () => setInput(BOOKMARK_KEYWORD + ">"),
+    subtitle: "Find and open bookmarks",
+    command: () => {
+      setInput("");
+      setSearchMode("bookmarks");
+    },
     keyword: BOOKMARK_KEYWORD + ">",
     icon: faviconURL("chrome://bookmarks/"),
     category: "navigation",
@@ -80,4 +84,11 @@ export default function bookmarkCommands(): Command[] {
 
   // Default: show static bookmark commands
   return staticBookmarkCommands;
+}
+
+/**
+ * Get all bookmarks for search mode
+ */
+export function getAllBookmarks(): Command[] {
+  return allBookmarksResource();
 }
