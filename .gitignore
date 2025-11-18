@@ -14,3 +14,8 @@
 
 #generated manifest
 public/manifest.json
+
+# planning and documentation
+ARCHITECTURE.md
+design.pdf
+.claude/

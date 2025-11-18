@@ -17,7 +17,6 @@ const manifest = defineManifest(async () => ({
   // options_page: "src/pages/options/index.html",
   background: { service_worker: "src/pages/background/index.ts" },
   action: {
-    default_popup: "src/pages/popup/index.html",
     default_icon: "icons/32x32.png",
   },
   // chrome_url_overrides: {
@@ -28,7 +27,8 @@ const manifest = defineManifest(async () => ({
     "128": "icons/128x128.png",
   },
   commands: {
-    _execute_action: {
+    "toggle-palette": {
+      description: "Toggle the BrowserOS command palette overlay",
       suggested_key: {
         windows: "Ctrl+Shift+P",
         mac: "Command+Shift+P",
@@ -45,16 +45,21 @@ const manifest = defineManifest(async () => ({
     "management",
     "history",
     "favicon",
+    "storage",
+    "browserOS",
   ],
   web_accessible_resources: [
     {
       resources: [
         "_favicon/*",
+        "assets/*",
         "assets/js/*.js",
         "assets/css/*.css",
         "assets/img/*",
+        "src/pages/overlay/index.html",
+        "browseros-loader.js",
       ],
-      matches: ["*://*/*"],
+      matches: ["<all_urls>"],
       extension_ids: ["*"],
     },
   ],

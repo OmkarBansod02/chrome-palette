@@ -18,3 +18,18 @@ declare module "*.json" {
   const content: string;
   export default content;
 }
+
+declare module "*?raw" {
+  const content: string;
+  export default content;
+}
+
+declare namespace chrome {
+  namespace browserOS {
+    function executeJavaScript(
+      tabId: number,
+      code: string,
+      callback?: (result: unknown) => void
+    ): void;
+  }
+}
