@@ -7,7 +7,7 @@ import { Command } from "@src/shared/types/command";
 import { PaletteCommandId } from "@src/shared/paletteCommandIds";
 import { PaletteQueryId } from "@src/shared/paletteQueryIds";
 import { CommandBuilder } from "../../utils/command-builder";
-import { createLazyResource, matchCommand, setInput } from "../../util/signals";
+import { createLazyResource, matchCommand, setInput, setSearchMode } from "../../util/signals";
 import { requestQuery } from "../../util/query";
 import { faviconURL } from "../../Entry";
 
@@ -50,7 +50,10 @@ const staticExtensionsCommands: Command[] = [
   CommandBuilder.createFrontendCommand({
     title: "Search Extensions",
     subtitle: "Find and manage installed extensions",
-    command: () => setInput(EXTENSIONS_KEYWORD + ">"),
+    command: () => {
+      setInput("");
+      setSearchMode("extensions");
+    },
     keyword: EXTENSIONS_KEYWORD + ">",
     icon: faviconURL("chrome://extensions/"),
     category: "navigation",
@@ -71,4 +74,11 @@ export default function extensionsCommands(): Command[] {
 
   // Default: show static extensions command
   return staticExtensionsCommands;
+}
+
+/**
+ * Get all extensions for search mode
+ */
+export function getAllExtensions(): Command[] {
+  return allExtensionsResource();
 }
