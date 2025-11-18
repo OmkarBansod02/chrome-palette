@@ -178,7 +178,25 @@
   };
 
   const api = ensureGlobal();
-  if (!document.getElementById(OVERLAY_ID)) {
+
+  // Global keyboard shortcut listener (Ctrl+B / Cmd+B)
+  const handleGlobalKeydown = (event) => {
+    // Check for Ctrl+B (Windows/Linux/ChromeOS) or Cmd+B (Mac)
+    const isCtrlB = (event.ctrlKey || event.metaKey) && event.key === 'b' && !event.shiftKey && !event.altKey;
+
+    if (isCtrlB) {
+      event.preventDefault();
+      event.stopPropagation();
+      api.toggle();
+    }
+  };
+
+  // Add keyboard listener with capture phase to intercept before Chrome
+  window.addEventListener('keydown', handleGlobalKeydown, true);
+
+  // Only auto-open if explicitly requested
+  const shouldOpen = window["__BROWSEROS_PALETTE_SHOULD_OPEN__"];
+  if (shouldOpen && !document.getElementById(OVERLAY_ID)) {
     api.open();
   }
 })();

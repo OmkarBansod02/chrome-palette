@@ -30,10 +30,10 @@ const manifest = defineManifest(async () => ({
     "toggle-palette": {
       description: "Toggle the BrowserOS command palette overlay",
       suggested_key: {
-        windows: "Ctrl+Shift+P",
-        mac: "Command+Shift+P",
-        chromeos: "Ctrl+Shift+P",
-        linux: "Ctrl+Shift+P",
+        windows: "Ctrl+B",
+        mac: "Command+B",
+        chromeos: "Ctrl+B",
+        linux: "Ctrl+B",
       },
     },
   },
