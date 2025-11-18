@@ -7,7 +7,7 @@ import { Command } from "@src/shared/types/command";
 import { PaletteCommandId } from "@src/shared/paletteCommandIds";
 import { PaletteQueryId } from "@src/shared/paletteQueryIds";
 import { CommandBuilder } from "../../utils/command-builder";
-import { createLazyResource, matchCommand, setInput } from "../../util/signals";
+import { createLazyResource, matchCommand, setInput, setSearchMode } from "../../util/signals";
 import { requestQuery } from "../../util/query";
 import { faviconURL } from "../../Entry";
 
@@ -54,7 +54,11 @@ const allHistoryResource = createLazyResource<Command[]>([], async () => {
 const staticHistoryCommands: Command[] = [
   CommandBuilder.createFrontendCommand({
     title: "Search History",
-    command: () => setInput(HISTORY_KEYWORD + ">"),
+    subtitle: "Browse recent browsing history",
+    command: () => {
+      setInput("");
+      setSearchMode("history");
+    },
     keyword: HISTORY_KEYWORD + ">",
     icon: faviconURL("chrome://history/"),
     category: "navigation",
@@ -75,4 +79,11 @@ export default function historyCommands(): Command[] {
 
   // Default: show static history commands
   return staticHistoryCommands;
+}
+
+/**
+ * Get all history for search mode
+ */
+export function getAllHistory(): Command[] {
+  return allHistoryResource();
 }
