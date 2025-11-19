@@ -179,20 +179,37 @@
 
   const api = ensureGlobal();
 
-  // Global keyboard shortcut listener (Ctrl+B / Cmd+B)
-  const handleGlobalKeydown = (event) => {
-    // Check for Ctrl+B (Windows/Linux/ChromeOS) or Cmd+B (Mac)
-    const isCtrlB = (event.ctrlKey || event.metaKey) && event.key === 'b' && !event.shiftKey && !event.altKey;
+  // Only add keyboard listener once per page (prevent multiple listeners on SPA navigation)
+  const LISTENER_KEY = "__BROWSEROS_PALETTE_LISTENER_ADDED__";
+  if (!window[LISTENER_KEY]) {
+    // Global keyboard shortcut listener (Ctrl+B / Cmd+B)
+    const handleGlobalKeydown = (event) => {
+      // Only handle trusted events (ignore synthetic events from scripts)
+      if (!event.isTrusted) {
+        return;
+      }
 
-    if (isCtrlB) {
-      event.preventDefault();
-      event.stopPropagation();
-      api.toggle();
-    }
-  };
+      // Use event.code for reliable key detection across keyboard layouts
+      // Check for Ctrl+B (Windows/Linux/ChromeOS) or Cmd+B (Mac)
+      const isCtrlB =
+        (event.ctrlKey || event.metaKey) &&
+        event.code === "KeyB" &&
+        !event.shiftKey &&
+        !event.altKey;
 
-  // Add keyboard listener with capture phase to intercept before Chrome
-  window.addEventListener('keydown', handleGlobalKeydown, true);
+      if (isCtrlB) {
+        event.preventDefault();
+        event.stopPropagation();
+        api.toggle();
+      }
+    };
+
+    // Add keyboard listener with capture phase to intercept before Chrome
+    window.addEventListener("keydown", handleGlobalKeydown, true);
+
+    // Mark that we've added the listener
+    window[LISTENER_KEY] = true;
+  }
 
   // Only auto-open if explicitly requested
   const shouldOpen = window["__BROWSEROS_PALETTE_SHOULD_OPEN__"];

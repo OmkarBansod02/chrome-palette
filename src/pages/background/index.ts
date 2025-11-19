@@ -28,8 +28,7 @@ const getActiveTabId = async () => {
   return tab?.id;
 };
 
-// Track which tabs have been injected to avoid duplicate injections
-const injectedTabs = new Set<number>();
+// No tracking needed - we inject on-demand when user triggers the palette
 
 const buildInjectionCode = (config: InjectionConfig, shouldOpen = true) => {
   const serializedConfig = JSON.stringify(config);
@@ -37,8 +36,12 @@ const buildInjectionCode = (config: InjectionConfig, shouldOpen = true) => {
     (function() {
       window["${CONFIG_KEY}"] = ${serializedConfig};
       window["__BROWSEROS_PALETTE_SHOULD_OPEN__"] = ${shouldOpen};
-      if (window.__browserosPalette && typeof window.__browserosPalette.toggle === 'function') {
-        window.__browserosPalette.toggle();
+      if (window.__browserosPalette && typeof window.__browserosPalette.open === 'function') {
+        // Only open if explicitly requested (e.g., user pressed Ctrl+B)
+        // Don't open on auto-injection during page load
+        if (${shouldOpen}) {
+          window.__browserosPalette.open();
+        }
         return;
       }
       ${loaderSource}
@@ -104,37 +107,8 @@ chrome.action.onClicked.addListener((tab) => {
   }
 });
 
-// Auto-inject loader on page load to enable Ctrl+K shortcut
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  // Clear injection tracking on navigation (URL change means new page context)
-  if (changeInfo.url) {
-    injectedTabs.delete(tabId);
-  }
-
-  // Inject as soon as page starts loading to catch early Ctrl+K presses
-  if (changeInfo.status === "loading" && isBrowserOSAvailable() && tab.url) {
-    // Skip if already injected in this tab
-    if (injectedTabs.has(tabId)) {
-      return;
-    }
-
-    // Mark as injected
-    injectedTabs.add(tabId);
-
-    // Inject loader without auto-opening the palette
-    injectLoaderInTab(tabId, false).catch((error) => {
-      // Remove from set if injection failed
-      injectedTabs.delete(tabId);
-      // Silently ignore errors (e.g., restricted pages like chrome://)
-      console.debug("[BrowserOS Palette] Could not inject loader in tab:", error.message);
-    });
-  }
-});
-
-// Clean up tracking when tabs are closed
-chrome.tabs.onRemoved.addListener((tabId) => {
-  injectedTabs.delete(tabId);
-});
+// No auto-injection needed - Chrome's command API works at browser level
+// The loader is injected on-demand when user presses Ctrl+B or clicks the extension icon
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === MESSAGE_RUN_COMMAND) {
